@@ -17,6 +17,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::post('signup', 'API\frontendAuth\RegisterController@signup');
+Route::post('signin', 'API\frontendAuth\LoginController@signin');
+
 Route::apiResources(['users' => 'API\UsersController']);
 Route::apiResources(['products' => 'API\ProductsController']);
 
