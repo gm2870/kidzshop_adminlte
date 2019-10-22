@@ -33,6 +33,10 @@ let routes = [
     },
     { path: "/users", component: require("./components/users.vue").default },
     {
+        path: "/products",
+        component: require("./components/products.vue").default
+    },
+    {
         path: "/profile",
         component: require("./components/profile.vue").default
     },

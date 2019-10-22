@@ -4,11 +4,11 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Users Table</h3>
+                        <h3 class="card-title">جدول محصولات</h3>
                         <div class="card-tools">
                             <button class="btn btn-success" @click="newModal">
-                                Add New
-                                <i class="fa fa-user-plus fa-fw"></i>
+                                افزودن
+                                <i class="fas fa-gift fa-fw"></i>
                             </button>
                         </div>
                     </div>
@@ -17,27 +17,34 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Type</th>
-                                    <th>Registered At</th>
-                                    <th>Modify</th>
+                                    <th>شناسه</th>
+                                    <th>نام</th>
+                                    <th>قیمت</th>
+                                    <th>موجودی</th>
+                                    <th>عکس</th>
+                                    <th>زمان ایجاد</th>
+                                    <th>ویرایش</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="user in users.data" :key="user.id">
-                                    <td>{{user.id}}</td>
-                                    <td>{{user.name}}</td>
-                                    <td>{{user.email}}</td>
-                                    <td>{{user.type | upText}}</td>
-                                    <td>{{user.created_at | beautifyDate }}</td>
-
+                                <tr v-for="product in products.data" :key="product.id">
+                                    <td>{{product.id}}</td>
+                                    <td>{{product.name}}</td>
+                                    <td>{{product.price}}</td>
+                                    <td>{{product.quantity}}</td>
                                     <td>
-                                        <a href="#" @click="editModal(user)">
+                                        <img
+                                            :src="'/images/product/'+product.photo"
+                                            alt
+                                            style="width:50px"
+                                        />
+                                    </td>
+                                    <td>{{product.created_at | beautifyDate }}</td>
+                                    <td>
+                                        <a href="#" @click="editModal(product)">
                                             <i class="fa fa-edit blue"></i>
                                         </a>
-                                        <a href="#" @click="deleteUser(user.id)">
+                                        <a href="#" @click="deleteProduct(product.id)">
                                             <i class="fa fa-trash-alt red"></i>
                                         </a>
                                     </td>
@@ -47,7 +54,7 @@
                     </div>
                     <!-- /.card-body -->
                     <div class="card-footer">
-                        <pagination :data="users" @pagination-change-page="getResults"></pagination>
+                        <pagination :data="products" @pagination-change-page="getResults"></pagination>
                     </div>
                 </div>
                 <!-- /.card -->
@@ -68,18 +75,26 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" v-show="editMode" id="addNewLabel">Update</h5>
-                        <h5 class="modal-title" v-show="!editMode" id="addNewLabel">Add New</h5>
+                        <h5 class="modal-title" v-show="editMode" id="addNewLabel">ویرایش</h5>
+                        <h5 class="modal-title" v-show="!editMode" id="addNewLabel">افزودن</h5>
 
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button
+                            type="button"
+                            class="close ml-0"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                        >
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form @submit.prevent="editMode ? updateUser() : createUser()">
+                    <form
+                        @submit.prevent="editMode ? updateProduct() : createProduct()"
+                        enctype="multipart/form-data"
+                    >
                         <div class="modal-body">
                             <div class="form-group">
                                 <input
-                                    placeholder="Name"
+                                    placeholder="نام محصول"
                                     v-model="form.name"
                                     type="text"
                                     name="name"
@@ -90,43 +105,39 @@
                             </div>
                             <div class="form-group">
                                 <input
-                                    placeholder="Email"
-                                    v-model="form.email"
+                                    placeholder="قیمت"
+                                    v-model="form.price"
                                     type="text"
-                                    name="email"
+                                    name="price"
                                     class="form-control"
-                                    :class="{ 'is-invalid': form.errors.has('email') }"
+                                    :class="{ 'is-invalid': form.errors.has('price') }"
                                 />
                                 <has-error :form="form" field="email"></has-error>
                             </div>
                             <div class="form-group">
-                                <textarea
-                                    placeholder="bio"
-                                    v-model="form.bio"
+                                <input
+                                    placeholder="موجودی"
+                                    v-model="form.quantity"
                                     type="text"
-                                    name="bio"
+                                    name="quantity"
                                     class="form-control"
-                                    :class="{ 'is-invalid': form.errors.has('bio') }"
-                                ></textarea>
-                                <has-error :form="form" field="bio"></has-error>
+                                    :class="{ 'is-invalid': form.errors.has('quantity') }"
+                                />
+                                <has-error :form="form" field="quantity"></has-error>
                             </div>
 
-                            <div class="form-group">
-                                <select
-                                    name="type"
-                                    id="type"
-                                    v-model="form.type"
-                                    class="form-control"
-                                    :class="{ 'is-invalid': form.errors.has('type') }"
-                                >
-                                    <option value>Select User Role</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="user">Standard User</option>
-                                    <option value="author">Author</option>
-                                </select>
-                                <has-error :form="form" field="type"></has-error>
+                            <div class="form-group productPhoto">
+                                <label for="photo">عکس محصول</label>
+                                <input
+                                    name="photo"
+                                    id="photo"
+                                    @change="addProductPhoto"
+                                    type="file"
+                                    placeholder="عکس محصول"
+                                />
+                                <has-error :form="form" field="photo"></has-error>
                             </div>
-                            <div class="form-group">
+                            <!-- <div class="form-group">
                                 <input
                                     placeholder="password"
                                     v-model="form.password"
@@ -136,12 +147,12 @@
                                     :class="{ 'is-invalid': form.errors.has('password') }"
                                 />
                                 <has-error :form="form" field="password"></has-error>
-                            </div>
+                            </div>-->
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                            <button type="submit" v-show="editMode" class="btn btn-success">Update</button>
-                            <button type="submit" v-show="!editMode" class="btn btn-primary">Create</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">بستن</button>
+                            <button type="submit" v-show="editMode" class="btn btn-success">ویرایش</button>
+                            <button type="submit" v-show="!editMode" class="btn btn-primary">افزودن</button>
                         </div>
                     </form>
                 </div>
@@ -155,51 +166,66 @@ export default {
     data() {
         return {
             editMode: false,
-            users: {},
+            products: {},
             form: new Form({
                 id: "",
                 name: "",
-                email: "",
-                password: "",
-                type: "",
-                bio: "",
+                price: "",
+                quantity: "",
                 photo: ""
             })
         };
     },
     methods: {
+        addProductPhoto(e) {
+            const file = e.target.files[0];
+            if (file["size"] < 2111775) {
+                let reader = new FileReader();
+                reader.onloadend = file => {
+                    this.form.photo = reader.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                this.form.photo = "";
+                Swal.fire({
+                    type: "error",
+                    title: "oops...",
+                    text: "image size should be less than 2mb"
+                });
+            }
+        },
         // Our method to GET results from a Laravel endpoint
         getResults(page = 1) {
-            axios.get("api/users?page=" + page).then(response => {
+            axios.get("api/products?page=" + page).then(response => {
                 this.users = response.data;
             });
         },
-        updateUser() {
+        updateProduct() {
             this.$Progress.start();
             this.form
-                .put(`api/users/${this.form.id}`)
+                .put(`api/products/${this.form.id}`)
                 .then(() => {
                     $("#addNew").modal("hide");
                     Swal.fire("Updated!", "info has been updated.", "success");
                     this.$Progress.finish();
-                    Fire.$emit("afterUserCreated");
+                    Fire.$emit("afterProductCreated");
                 })
                 .catch(() => {
                     this.$Progress.fail();
                 });
         },
-        editModal(user) {
+        editModal(product) {
             this.editMode = true;
             this.form.reset();
             $("#addNew").modal("show");
-            this.form.fill(user);
+            this.form.fill(product);
         },
         newModal() {
             this.editMode = false;
             this.form.reset();
             $("#addNew").modal("show");
         },
-        deleteUser(id) {
+        deleteProduct(id) {
             Swal.fire({
                 title: "Are you sure?",
                 text: "You won't be able to revert this!",
@@ -212,14 +238,14 @@ export default {
                 // send request to the server
                 if (result.value) {
                     this.form
-                        .delete(`api/users/${id}`)
+                        .delete(`api/products/${id}`)
                         .then(() => {
                             Swal.fire(
                                 "Deleted!",
-                                "the user has been deleted.",
+                                "the product has been deleted.",
                                 "success"
                             );
-                            Fire.$emit("afterUserCreated");
+                            Fire.$emit("afterProductCreated");
                         })
                         .catch(error => {
                             Swal.fire(
@@ -231,21 +257,23 @@ export default {
                 }
             });
         },
-        loadUsers() {
+        loadProducts() {
             if (this.$gate.isAdminOrAuthor()) {
-                axios.get("api/users").then(({ data }) => (this.users = data));
+                axios
+                    .get("api/products")
+                    .then(response => (this.products = response));
             }
         },
-        createUser() {
+        createProduct() {
             this.$Progress.start();
             this.form
-                .post("api/users")
-                .then(() => {
-                    Fire.$emit("afterUserCreated");
+                .post("api/products")
+                .then(response => {
+                    Fire.$emit("afterProductCreated");
                     $("#addNew").modal("hide");
                     toast.fire({
                         type: "success",
-                        title: "user created successfully"
+                        title: "محصول اضافه شد"
                     });
                     this.$Progress.finish();
                 })
@@ -256,15 +284,15 @@ export default {
         Fire.$on("searching", () => {
             let query = this.$parent.search;
             axios
-                .get("api/findUser?q=" + query)
+                .get("api/findProduct?q=" + query)
                 .then(data => {
                     console.log(data);
                     this.users = data.data;
                 })
                 .catch(() => {});
         });
-        this.loadUsers();
-        Fire.$on("afterUserCreated", () => this.loadUsers());
+        this.loadProducts();
+        Fire.$on("afterProductCreated", () => this.loadProducts());
     }
 };
 </script>

@@ -255,7 +255,6 @@ export default {
         },
         updateProfilePhoto(e) {
             let file = e.target.files[0];
-            console.log(file);
             if (file["size"] < 2111775) {
                 let reader = new FileReader();
                 reader.onloadend = file => {
